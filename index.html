@@ -1025,6 +1025,9 @@ textarea.io{width:100%;height:150px;background:var(--surface2);border:1px solid 
 `;
 
 const CSS_MOB = CSS_BASE + `
+.sec-lab.big{font-size:12.5px;letter-spacing:1.4px;margin:18px 4px 10px;}
+.sec-lab.big span{font-size:16px;font-weight:700;}
+.sec-lab.big .chev{font-size:12px;}
 html,body{overscroll-behavior-y:none;}
 
 /* ══ APP BAR ══ */
@@ -1816,7 +1819,6 @@ const HTML_MOB = `<header class="appbar">
   <button data-act="view" data-v="fijos">${ICO.fijos}<span>Fijos</span></button>
 </nav>
 
-<button class="fab" data-act="nuevo" aria-label="Añadir movimiento">＋</button>
 <div class="sheet-ov" id="ov" data-act="close-sheet"></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>`;
@@ -1857,7 +1859,7 @@ function initMobile() {
       if (!arr.length) return "";
       const abierto = U.openSec.indexOf(kind) >= 0;
       const tot = arr.reduce((a, m) => a + num(m.amount), 0);
-      return '<button class="sec-lab ' + (kind === "ingreso" ? "ing" : "gas") + '" data-act="sec" data-s="' + kind + '">' +
+      return '<button class="sec-lab big ' + (kind === "ingreso" ? "ing" : "gas") + '" data-act="sec" data-s="' + kind + '">' +
         KINDS[kind].plural + ' · ' + arr.length +
         '<span>' + money(tot) + '<i class="chev' + (abierto ? ' open' : '') + '">▾</i></span></button>' +
         (abierto ? '<div class="card">' + filas(arr) + '</div>' : '');
