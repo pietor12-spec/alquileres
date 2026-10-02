@@ -6,7 +6,7 @@ App web instalable (PWA) para llevar los **ingresos, gastos y fijos** de las viv
 (Madrid y Donostia): resumen por vivienda y año, registro de movimientos, gastos/ingresos fijos que
 se apuntan solos cada mes y copia de seguridad.
 
-**Abrir la app:** https://USUARIO.github.io/alquileres/
+**Abrir la app:** https://pietor12-spec.github.io/alquileres/
 
 ## Instalarla
 
