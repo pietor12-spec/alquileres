@@ -39,6 +39,11 @@ const PROPS = {
   donostia: { id: "donostia", label: "Donostia", full: "Piso Donostia · Intxaurrondo", ini: "D" },
   todas:    { id: "todas",    label: "Todas",    full: "Las dos viviendas",            ini: "∑" }
 };
+const ACENTO_PROP = {
+  madrid:   { m: "#ffd740", rgb: "255,215,64", ink: "#241a00" },
+  donostia: { m: "#22d3ee", rgb: "34,211,238", ink: "#002a33" },
+  todas:    { m: "#00e676", rgb: "0,230,118",  ink: "#00230f" }
+};
 const ORDEN_PROP = ["madrid", "donostia", "todas"];
 
 /* conceptos por tipo de movimiento */
@@ -595,6 +600,11 @@ function aplicarAcento() {
   r.setProperty("--m", ACENTO.m);
   r.setProperty("--m-rgb", ACENTO.rgb);
   r.setProperty("--m-ink", ACENTO.ink);
+  /* color propio de cada vivienda: botón elegido, recuadro del resumen y balance grande */
+  const P = ACENTO_PROP[U.prop] || ACENTO;
+  r.setProperty("--p", P.m);
+  r.setProperty("--p-rgb", P.rgb);
+  r.setProperty("--p-ink", P.ink);
 }
 
 
@@ -1039,6 +1049,12 @@ textarea.io{width:100%;height:150px;background:var(--surface2);border:1px solid 
 `;
 
 const CSS_MOB = CSS_BASE + `
+/* acento por vivienda (solo selector, recuadro del resumen y balance grande) */
+.pbar button.on{color:var(--p-ink) !important;background:linear-gradient(135deg,var(--p),color-mix(in srgb,var(--p) 62%,#000)) !important;}
+.hero{background:linear-gradient(155deg,rgba(var(--p-rgb),.10),var(--surface) 62%) !important;
+  border-color:rgba(var(--p-rgb),.4) !important;box-shadow:0 0 34px rgba(var(--p-rgb),.13) !important;}
+.hero-val{color:var(--p) !important;text-shadow:0 0 26px rgba(var(--p-rgb),.3) !important;}
+.hero, .hero-val, .pbar button{transition:background .3s,border-color .3s,box-shadow .3s,color .3s;}
 .sec-lab.big{font-size:12.5px;letter-spacing:1.4px;margin:18px 4px 10px;}
 .sec-lab.big span{font-size:16px;font-weight:700;}
 .sec-lab.big .chev{font-size:12px;}
