@@ -564,6 +564,19 @@ function preguntarSimple(t, sub, si, fn) {
   document.querySelectorAll('[data-act="ask-si"]').forEach(b => { b.textContent = si; });
   document.querySelectorAll('.modal .sub, .sheet .sub').forEach(x => { if (x.textContent === "Esta acción no se puede deshacer.") x.textContent = sub; });
 }
+function pmenu(abrir) {
+  const m = el("pmenu"), o = el("pmenu-ov"), b = el("ab-menu");
+  if (!m) return;
+  if (abrir) {
+    m.innerHTML = '<div class="pm-lab">Vivienda</div>' + ORDEN_PROP.map(k =>
+      '<button role="menuitem" data-act="prop-m" data-p="' + k + '"' + (U.prop === k ? ' class="on"' : '') + '>' +
+      '<span class="pm-ini">' + PROPS[k].ini + '</span>' + esc(PROPS[k].label) + (U.prop === k ? '<span class="ck">✓</span>' : '') + '</button>').join("") +
+      '<hr><button role="menuitem" data-act="pmenu-datos">' + ICO.datos + 'Datos y copia</button>';
+  }
+  m.classList.toggle("open", !!abrir);
+  if (o) o.classList.toggle("open", !!abrir);
+  if (b) b.classList.toggle("open", !!abrir);
+}
 /* ---------- aviso flotante ---------- */
 let _tT = null;
 function toast(m) {
@@ -1049,6 +1062,33 @@ html,body{overscroll-behavior-y:none;}
 .ab-btn.add{color:var(--m-ink);background:linear-gradient(135deg,var(--m),color-mix(in srgb,var(--m) 62%,#000));
   border-color:transparent;font-size:21px;font-weight:700;line-height:1;}
 
+/* ══ MENÚ DESPLEGABLE: vivienda + datos ══ */
+.ab-menu{display:flex;align-items:center;gap:8px;padding:0 10px 0 0;height:38px;border-radius:12px;flex-shrink:0;
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);}
+.ab-menu .ab-logo{border-radius:11px 0 0 11px;height:38px;}
+.ab-menu .ab-prop{font-size:13.5px;font-weight:800;letter-spacing:-.2px;}
+.ab-menu i{font-style:normal;font-size:11px;color:var(--muted);transition:transform .2s;}
+.ab-menu.open i{transform:rotate(180deg);}
+.ab-menu:active{background:var(--surface3);}
+.pmenu-ov{position:fixed;inset:0;z-index:70;display:none;}
+.pmenu-ov.open{display:block;}
+.pmenu{position:fixed;top:calc(var(--sat) + 56px);left:12px;z-index:71;min-width:230px;padding:6px;border-radius:16px;
+  background:var(--surface);border:1px solid var(--border);box-shadow:0 18px 44px rgba(0,0,0,.6);
+  display:none;transform-origin:top left;}
+.pmenu.open{display:block;animation:pmIn .14s ease-out;}
+@keyframes pmIn{from{opacity:0;transform:scale(.96) translateY(-4px);}to{opacity:1;transform:none;}}
+.pmenu .pm-lab{font-size:9.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:9px 12px 5px;}
+.pmenu button{display:flex;align-items:center;gap:11px;width:100%;padding:12px;border-radius:11px;font-size:14.5px;
+  font-weight:700;text-align:left;color:var(--text);}
+.pmenu button:active{background:var(--surface2);}
+.pmenu button.on{color:var(--m);background:rgba(var(--m-rgb),.1);}
+.pmenu button .ck{margin-left:auto;font-size:13px;}
+.pmenu button svg{width:17px;height:17px;color:var(--muted);}
+.pmenu .pm-ini{width:24px;height:24px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;
+  font-weight:800;background:var(--surface2);border:1px solid var(--border);}
+.pmenu button.on .pm-ini{background:var(--m);color:var(--m-ink);border-color:transparent;}
+.pmenu hr{border:none;border-top:1px solid var(--border);margin:6px 4px;}
+
 /* ══ SELECTOR DE VIVIENDA (fijo arriba) ══ */
 .pbar{position:fixed;top:calc(var(--sat) + 59px);left:0;right:0;z-index:55;
   display:flex;gap:8px;padding:9px 14px 11px;background:rgba(10,18,32,.96);backdrop-filter:blur(18px);
@@ -1066,7 +1106,7 @@ html,body{overscroll-behavior-y:none;}
 .nav button svg{width:21px;height:21px;}
 .nav button.on{color:var(--m);}
 
-main{padding:calc(var(--sat) + 126px) 14px calc(var(--sab) + 112px);max-width:560px;margin:0 auto;}
+main{padding:calc(var(--sat) + 74px) 14px calc(var(--sab) + 112px);max-width:560px;margin:0 auto;}
 
 /* ══ CARDS ══ */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:12px;}
@@ -1803,13 +1843,13 @@ function initDesktop() {
 
 /* ══════════════ INTERFAZ DE MÓVIL ══════════════ */
 const HTML_MOB = `<header class="appbar">
-  <div class="ab-logo">${ICO.casa}</div>
-  <div class="ab-tit"><b>Gastos Vivienda</b><span id="ab-sub">—</span></div>
-  <button class="ab-btn" data-act="datos" aria-label="Datos">${ICO.datos}</button>
+  <button class="ab-menu" id="ab-menu" data-act="pmenu" aria-label="Elegir vivienda y datos" aria-haspopup="true">
+    <span class="ab-logo">${ICO.casa}</span><span class="ab-prop" id="ab-prop">Madrid</span><i>▾</i></button>
+  <div class="ab-tit"><b>Gastos Vivienda</b></div>
   <button class="ab-btn add" data-act="nuevo" aria-label="Añadir movimiento">＋</button>
 </header>
-
-<div class="pbar" id="pbar"></div>
+<div class="pmenu-ov" id="pmenu-ov" data-act="pmenu-close"></div>
+<div class="pmenu" id="pmenu" role="menu"></div>
 
 <main id="app"></main>
 
@@ -1887,6 +1927,8 @@ function initMobile() {
     const sub = el("ab-sub");
     if (sub) sub.innerHTML = '<span class="dot' + (SYNC.mode === "cloud" ? " ok" : "") + '"></span>' +
       esc(PROPS[U.prop].full) + " · " + money0(st.balance);
+    const ap = el("ab-prop");
+    if (ap) ap.textContent = PROPS[U.prop].label;
     const pb = el("pbar");
     if (pb) pb.innerHTML = ORDEN_PROP.map(k =>
       '<button data-act="prop" data-p="' + k + '"' + (U.prop === k ? ' class="on"' : '') + '>' + PROPS[k].label + '</button>').join("");
@@ -1974,6 +2016,10 @@ function act(a, ds) {
     case "fj-del": preguntar("¿Eliminar este fijo?", () => { delFijo(ds.id); toast("Fijo eliminado"); }); break;
     /* datos y vistas */
     case "datos": abrirDatos(); break;
+    case "pmenu": pmenu(!(el("pmenu") && el("pmenu").classList.contains("open"))); break;
+    case "pmenu-close": pmenu(false); break;
+    case "prop-m": pmenu(false); U.prop = ds.p; U.fTipo = ""; U.fYear = ""; saveLocal(); repaint(); break;
+    case "pmenu-datos": pmenu(false); abrirDatos(); break;
     case "vista-movil": setVista("movil"); break;
     case "vista-escritorio": setVista("dashboard"); break;
     case "mesAnyo": {
