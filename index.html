@@ -1052,6 +1052,7 @@ html,body{overscroll-behavior-y:none;}
   display:flex;align-items:center;justify-content:center;color:var(--m-ink);flex-shrink:0;transition:background .3s;}
 .ab-logo svg{width:20px;height:20px;}
 .ab-tit{flex:1;min-width:0;}
+.ab-tit b.ab-big{font-size:21px;letter-spacing:-.4px;line-height:1.1;}
 .ab-tit b{display:block;font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ab-tit span{display:block;font-family:'JetBrains Mono';font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ab-tit .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;}
@@ -1117,6 +1118,10 @@ main{padding:calc(var(--sat) + 126px) 14px calc(var(--sab) + 40px);max-width:560
 .hero{background:linear-gradient(155deg,rgba(var(--m-rgb),.10),var(--surface) 62%);
   border:1px solid rgba(var(--m-rgb),.4);box-shadow:0 0 34px rgba(var(--m-rgb),.13);
   border-radius:20px;padding:20px 16px;margin-bottom:12px;}
+/* el resumen ocupa la pantalla: la gráfica empieza más abajo */
+.hero{display:flex;flex-direction:column;min-height:calc(100svh - var(--sat) - var(--sab) - 128px);}
+.hero .wrapx{flex:1;display:flex;flex-direction:column;}
+.hero .wrapx table.mx{flex:1;height:100%;}
 .hero-lab{font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--muted);}
 .hero-val{font-family:'JetBrains Mono';font-size:40px;font-weight:700;letter-spacing:-2px;line-height:1.05;
   margin-top:8px;color:var(--m);text-shadow:0 0 26px rgba(var(--m-rgb),.3);}
@@ -1845,7 +1850,8 @@ function initDesktop() {
 /* ══════════════ INTERFAZ DE MÓVIL ══════════════ */
 const HTML_MOB = `<header class="appbar">
   <button class="ab-btn ab-burger" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true">${ICO.menu}</button>
-  <div class="ab-tit"><b>Gastos Vivienda</b><span id="ab-sub">—</span></div>
+  <div class="ab-logo">${ICO.casa}</div>
+  <div class="ab-tit"><b class="ab-big">Alquileres</b></div>
   <button class="ab-btn add" data-act="nuevo" aria-label="Añadir movimiento">＋</button>
 </header>
 
