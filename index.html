@@ -583,6 +583,20 @@ function pmenu(abrir) {
   if (o) o.classList.toggle("open", !!abrir);
   if (b) b.classList.toggle("open", !!abrir);
 }
+/* cargar copia desde un archivo .json */
+document.addEventListener("change", function (ev) {
+  if (!ev.target || ev.target.id !== "d-file") return;
+  const f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = function () {
+    const ta = el("d-in");
+    if (ta) ta.value = String(rd.result || "");
+    dataImport();
+  };
+  rd.onerror = function () { toast("No se pudo leer el archivo"); };
+  rd.readAsText(f);
+});
 /* ---------- aviso flotante ---------- */
 let _tT = null;
 function toast(m) {
@@ -826,6 +840,7 @@ button{background:none;border:none;cursor:pointer;}
 .sec-lab .chev{font-style:normal;font-size:10px;color:var(--muted);transition:transform .2s;}
 .sec-lab .chev.open{transform:rotate(180deg);}
 .sec-lab.ing{color:var(--green);} .sec-lab.gas{color:var(--red);}
+.btn svg{width:17px;height:17px;vertical-align:-3px;margin-right:6px;}
 `;
 
 const CSS_DESK = CSS_BASE + `
@@ -1598,12 +1613,14 @@ function dataHTML() {
     '<div class="btn2"><button class="btn gho" data-act="d-copy">Copiar</button>' +
     '<button class="btn gho" data-act="d-down">Descargar .json</button></div></div>' +
     '<div class="fg" style="margin-top:18px"><label>Restaurar / importar</label>' +
+    '<input type="file" id="d-file" accept=".json,application/json" style="display:none">' +
     '<textarea class="io" id="d-in" placeholder="Pega aquí el contenido de una copia…"></textarea>' +
     '<div class="chipset" id="d-modo">' +
     '<button data-act="d-modo" data-m="replace" class="on">Reemplazar todo</button>' +
     '<button data-act="d-modo" data-m="merge">Añadir a lo existente</button></div></div>' +
     '<div id="d-err"></div>' +
-    '<button class="btn pri" style="margin-top:14px" data-act="d-import">Restaurar datos</button>' +
+    '<div class="btn2" style="margin-top:14px"><button class="btn gho" data-act="d-file">' + ICO.disquete + 'Cargar .json</button>' +
+    '<button class="btn pri" data-act="d-import">Restaurar texto</button></div>' +
     '<button class="btn gho" data-act="d-save">Guardar ahora en este dispositivo</button>';
 }
 let D_MODO = "replace";
@@ -1635,8 +1652,6 @@ const HTML_DESK = `<header class="header">
   <div class="header-actions">
     <div class="sync"><i></i>—</div>
     <div class="seg" id="prop-seg"></div>
-    <button class="btn-ghost" data-act="vista-movil" title="Ver la app de móvil">${ICO.movil}</button>
-    <button class="btn-ghost" data-act="datos">${ICO.datos} Datos</button>
     <button class="btn-primary solo" data-act="nuevo" title="Nuevo movimiento" aria-label="Nuevo movimiento">＋</button>
   </div>
 </header>
@@ -1652,6 +1667,8 @@ const HTML_DESK = `<header class="header">
     <button class="tab-btn active" data-act="tab" data-t="resumen">${ICO.resumen}<span>Resumen</span></button>
     <button class="tab-btn" data-act="tab" data-t="registro">${ICO.registro}<span>Registro</span></button>
     <button class="tab-btn" data-act="tab" data-t="fijos">${ICO.fijos}<span>Fijos</span></button>
+    <div style="border-top:1px solid var(--border);margin:8px 4px"></div>
+    <button class="tab-btn" data-act="nav-datos">${ICO.disquete}<span>Datos y copia</span></button>
   </nav>
   <div class="nav-drawer-foot"><button data-act="nav-close">‹ Ocultar</button></div>
 </aside>
@@ -2015,6 +2032,8 @@ function act(a, ds) {
   switch (a) {
     case "prop": U.prop = ds.p; U.fTipo = ""; U.fYear = ""; saveLocal(); repaint(); break;
     case "tab": U.tab = ds.t; abrirNav(false); saveLocal(); repaint(); break;
+    case "nav-datos": abrirNav(false); abrirDatos(); break;
+    case "d-file": { const f = el("d-file"); if (f) { f.value = ""; f.click(); } break; }
     case "view": U.view = ds.v; saveLocal(); repaint(); break;
     case "pmenu": pmenu(!(el("pmenu") && el("pmenu").classList.contains("open"))); break;
     case "pmenu-close": pmenu(false); break;
