@@ -37,7 +37,7 @@ const ACENTO = { m: "#ffd740", rgb: "255,215,64", ink: "#241a00" };
 const PROPS = {
   madrid:   { id: "madrid",   label: "Madrid",   full: "Piso Madrid",                  ini: "M" },
   donostia: { id: "donostia", label: "Donostia", full: "Piso Donostia · Intxaurrondo", ini: "D" },
-  todas:    { id: "todas",    label: "Todas",    full: "Las dos viviendas",            ini: "∑" }
+  todas:    { id: "todas",    label: "Total",    full: "Las dos viviendas",            ini: "∑" }
 };
 const ACENTO_PROP = {
   madrid:   { m: "#ffd740", rgb: "255,215,64", ink: "#241a00" },
@@ -1122,6 +1122,12 @@ html,body{overscroll-behavior-y:none;}
 
 /* ══ MENÚ DESPLEGABLE DE SECCIONES ══ */
 .ab-burger{color:var(--text);}
+.ab-logo-btn{position:relative;border:none;cursor:pointer;width:42px;height:42px;}
+.ab-logo-btn svg{width:22px;height:22px;}
+.ab-logo-btn .ab-caret{position:absolute;right:-4px;bottom:-4px;width:17px;height:17px;border-radius:50%;font-style:normal;
+  font-size:9px;line-height:17px;text-align:center;background:var(--surface);color:var(--m);border:1px solid var(--border);transition:transform .2s;}
+.ab-logo-btn.open .ab-caret{transform:rotate(180deg);}
+.ab-logo-btn:active{filter:brightness(.92);}
 .ab-burger.open{border-color:var(--m);color:var(--m);background:rgba(var(--m-rgb),.1);}
 .pmenu hr{border:none;border-top:1px solid var(--border);margin:6px 4px;}
 .ab-menu{display:flex;align-items:center;gap:8px;padding:0 10px 0 0;height:38px;border-radius:12px;flex-shrink:0;
@@ -1907,8 +1913,7 @@ function initDesktop() {
 
 /* ══════════════ INTERFAZ DE MÓVIL ══════════════ */
 const HTML_MOB = `<header class="appbar">
-  <button class="ab-btn ab-burger" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true">${ICO.menu}</button>
-  <div class="ab-logo">${ICO.casa}</div>
+  <button class="ab-logo ab-logo-btn" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true">${ICO.casa}<i class="ab-caret">▾</i></button>
   <div class="ab-tit"><b class="ab-big">Alquileres</b></div>
   <button class="ab-btn add" data-act="nuevo" aria-label="Añadir movimiento">＋</button>
 </header>
