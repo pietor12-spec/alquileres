@@ -1109,6 +1109,8 @@ html,body{overscroll-behavior-y:none;}
 .ab-logo svg{width:20px;height:20px;}
 .ab-tit{flex:1;min-width:0;}
 .ab-tit b.ab-big{font-size:21px;letter-spacing:-.4px;line-height:1.1;}
+.appbar .ab-tit{text-align:center;}
+.appbar .ab-logo-btn,.appbar .ab-btn.add{width:42px;height:42px;}
 .ab-tit b{display:block;font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ab-tit span{display:block;font-family:'JetBrains Mono';font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ab-tit .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;}
@@ -1913,7 +1915,7 @@ function initDesktop() {
 
 /* ══════════════ INTERFAZ DE MÓVIL ══════════════ */
 const HTML_MOB = `<header class="appbar">
-  <button class="ab-logo ab-logo-btn" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true">${ICO.casa}<i class="ab-caret">▾</i></button>
+  <button class="ab-logo ab-logo-btn" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true">${ICO.casa}</button>
   <div class="ab-tit"><b class="ab-big">Alquileres</b></div>
   <button class="ab-btn add" data-act="nuevo" aria-label="Añadir movimiento">＋</button>
 </header>
