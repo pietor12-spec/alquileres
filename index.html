@@ -767,7 +767,7 @@ button{background:none;border:none;cursor:pointer;}
 
 /* ══ ANILLO ══ */
 .donut-wrap{display:flex;align-items:center;justify-content:center;gap:30px;flex-wrap:wrap;padding:6px 0 4px;}
-.donut{position:relative;width:170px;height:170px;flex-shrink:0;}
+.donut{position:relative;width:170px;height:170px;flex-shrink:0;container-type:size;}
 .donut svg{width:100%;height:100%;overflow:visible;}
 .donut circle{transition:opacity .18s;}
 .donut:hover circle{opacity:.55;}
@@ -1042,7 +1042,8 @@ const CSS_DESK = CSS_BASE + `
 .res-top .mx th{padding-bottom:7px;}
 .res-top .donas{gap:14px;}
 .res-top .donut{width:140px;height:140px;}
-.res-top .donut-c b{font-size:18px;}
+.res-top .donut-c b{font-size:min(18px, calc(100cqw * 0.5 / (var(--n, 7) * 0.6)));}
+.donut-c b{font-size:min(21px, calc(100cqw * 0.5 / (var(--n, 7) * 0.6)));white-space:nowrap;}
 .res-top .donut-wrap{padding:0;}
 /* la fila se estira hasta el borde inferior de la pantalla (lo ajusta ajustarResTop) */
 .res-top > .chart-card{display:flex;flex-direction:column;}
@@ -1504,7 +1505,7 @@ function donutHTML(bl, kind, limite) {
   return '<div class="donut-wrap"><div class="donut">' +
     '<svg viewBox="0 0 140 140"><circle cx="70" cy="70" r="' + R + '" fill="none" stroke="var(--surface2)" stroke-width="19"/>' +
     '<g transform="rotate(-90 70 70)">' + arcos + '</g></svg>' +
-    '<div class="donut-c"><b>' + money0(total) + '</b><span>' + (kind === "ingreso" ? "ingresos" : "gastos") + '</span></div></div>' +
+    '<div class="donut-c"><b style="--n:' + money0(total).length + '">' + money0(total) + '</b><span>' + (kind === "ingreso" ? "ingresos" : "gastos") + '</span></div></div>' +
     '<div class="dleg">' + leyenda + '</div></div>';
 }
 
