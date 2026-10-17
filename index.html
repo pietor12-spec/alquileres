@@ -597,6 +597,11 @@ function ajustarResTop() {
   r.style.minHeight = "";
   const top = r.getBoundingClientRect().top + window.scrollY;
   const libre = window.innerHeight - top - 14;
+  /* si no cabe, los anillos encogen un poco (los dos igual) */
+  let dsz = 156;
+  r.style.setProperty("--dsz", dsz + "px");
+  const dn = r.querySelector(".donas");
+  while (dn && dn.offsetHeight > libre && dsz > 132) { dsz -= 4; r.style.setProperty("--dsz", dsz + "px"); }
   if (libre > r.offsetHeight) r.style.minHeight = libre + "px";
 }
 window.addEventListener("resize", () => requestAnimationFrame(ajustarResTop));
@@ -1041,8 +1046,11 @@ const CSS_DESK = CSS_BASE + `
 .res-top .mx tr.sep td{padding:6px 0 0;}
 .res-top .mx th{padding-bottom:7px;}
 .res-top .donas{gap:14px;}
-.res-top .donut{width:140px;height:140px;}
-.res-top .donut-c b{font-size:min(18px, calc(100cqw * 0.5 / (var(--n, 7) * 0.6)));}
+.res-top .donut{width:var(--dsz,156px);height:var(--dsz,156px);}
+.res-top .donut circle{stroke-width:15;}
+.res-top .donas .chart-card{padding:12px 20px 14px;}
+.res-top .donas .chart-head{margin-bottom:6px;}
+.res-top .donut-c b{font-size:18px;}
 .donut-c b{font-size:min(21px, calc(100cqw * 0.5 / (var(--n, 7) * 0.6)));white-space:nowrap;}
 .res-top .donut-wrap{padding:0;}
 /* la fila se estira hasta el borde inferior de la pantalla (lo ajusta ajustarResTop) */
