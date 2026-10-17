@@ -919,7 +919,7 @@ const CSS_DESK = CSS_BASE + `
 .logo-mark{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--m),color-mix(in srgb,var(--m) 62%,#000));
   display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--m-ink);transition:background .3s;}
 .logo-mark svg{width:23px;height:23px;}
-.header h1{font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.1;}
+.header h1{font-size:32px;font-weight:800;letter-spacing:-0.5px;line-height:1.1;}
 .header h1 span{color:var(--m);transition:color .3s;}
 .header-meta{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-top:3px;}
 .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -1017,6 +1017,11 @@ const CSS_DESK = CSS_BASE + `
 .chart-title.grande{font-size:14px;letter-spacing:1.2px;}
 .chart-title.grande::before{height:19px;width:5px;}
 .chart-title.oro{color:var(--m);}
+.res-top{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:stretch;}
+.donas{display:flex;flex-direction:column;gap:20px;}
+.res-top .wrapx table.mx{width:100%;}
+.donas .chart-card{flex:1;}
+@media(max-width:1100px){.res-top{grid-template-columns:1fr;}}
 .corte{height:1px;background:var(--border);margin:34px 0 30px;}
 .mes-head{display:flex;align-items:center;gap:16px;}
 .balance-grid{display:grid;grid-template-columns:auto minmax(300px,0.8fr);gap:44px;align-items:start;}
@@ -1422,10 +1427,10 @@ function barsHTML(st, sinLeyenda) {
   });
   return h + '</div>';
 }
-function monthBarsHTML(st, year, sinLeyenda) {
+function monthBarsHTML(st, year, sinLeyenda, sinBalance) {
   const I = st.I.byMonth[year] || new Array(12).fill(0), G = st.G.byMonth[year] || new Array(12).fill(0);
   const B = I.map((v, i) => v - G[i]);
-  const max = Math.max.apply(null, I.concat(G, B.map(Math.abs))) || 1;
+  const max = Math.max.apply(null, sinBalance ? I.concat(G) : I.concat(G, B.map(Math.abs))) || 1;
   const alto = (v) => Math.max(2, Math.round(Math.abs(v) / max * 112));
   let h = (sinLeyenda ? '' : leyendaHTML(true)) + '<div class="bars meses">';
   for (let i = 0; i < 12; i++) {
@@ -1433,10 +1438,10 @@ function monthBarsHTML(st, year, sinLeyenda) {
       '<u class="btip"><em>' + MESES[i] + '</em><div>' +
       '<span class="ing">' + money0(I[i]) + '</span>' +
       '<span class="gas">' + money0(G[i]) + '</span>' +
-      '<span class="bal">' + money0(B[i]) + '</span></div></u>' +
+      (sinBalance ? '' : '<span class="bal">' + money0(B[i]) + '</span>') + '</div></u>' +
       '<div class="bt"><i class="ing" style="height:' + alto(I[i]) + 'px"></i>' +
       '<i class="gas" style="height:' + alto(G[i]) + 'px"></i>' +
-      '<i class="bal" style="height:' + alto(B[i]) + 'px"></i></div>' +
+      (sinBalance ? '' : '<i class="bal" style="height:' + alto(B[i]) + 'px"></i>') + '</div>' +
       '<b>' + MESES_C[i] + '</b></div>';
   }
   return h + '</div>';
@@ -1788,35 +1793,36 @@ function initDesktop() {
       kpi("Gasto mensual", money(st.G.grand / (st.nY * 12)), "red") +
       kpi("Fijos activos", String(act.length), "cyan") +
       '</div></div>';
-    h += '<div class="section-grid grid-2">' +
-      '<div class="chart-card mode"><div class="chart-head centro"><div class="chart-title green">De dónde viene el dinero</div></div>' +
-      donutHTML(st.I, "ingreso", 5) + '</div>' +
-      '<div class="chart-card"><div class="chart-head centro"><div class="chart-title red">En qué se va el dinero</div></div>' +
-      donutHTML(st.G, "gasto", 6) + '</div>' +
-      '</div>';
+    const dIng = '<div class="chart-card mode"><div class="chart-head centro"><div class="chart-title green">De dónde viene el dinero</div></div>' +
+      donutHTML(st.I, "ingreso", 5) + '</div>';
+    const dGas = '<div class="chart-card"><div class="chart-head centro"><div class="chart-title red">En qué se va el dinero</div></div>' +
+      donutHTML(st.G, "gasto", 6) + '</div>';
 
-    /* año del gráfico mensual: el último con datos, navegable con ‹ › */
+    /* fila 2: tabla de ingresos, gastos y balance + los dos anillos a la derecha */
+    h += '<div class="section-grid res-top">' +
+      '<div class="chart-card mode"><div class="chart-head"><div class="chart-title grande">Ingresos, gastos y balance</div></div>' +
+      '<div class="wrapx">' + balanceHTML(st) + '</div></div>' +
+      '<div class="donas">' + dIng + dGas + '</div></div>';
+
+    /* fila 3: mensual (sin balance) y anual */
     const ys = st.years.length ? st.years : [YEAR_NOW];
     const iy = Math.max(0, ys.indexOf(U.mesAnyo) >= 0 ? ys.indexOf(U.mesAnyo) : ys.length - 1);
     const ay = ys[iy];
-    h += '<div class="chart-card mode">' +
-      '<div class="chart-head"><div class="chart-title grande">Ingresos, gastos y balance</div></div>' +
-      '<div class="balance-grid"><div class="wrapx">' + balanceHTML(st) + '</div>' +
-      '<div class="bside">' +
+    h += '<div class="section-grid grid-2">' +
+      '<div class="chart-card bside">' +
       '<div class="chart-head"><div class="chart-title">Mensual</div>' +
       '<div class="yearnav"><button data-act="mesAnyo" data-d="-1"' + (iy <= 0 ? ' disabled' : '') + '>‹</button>' +
       '<span>' + ay + '</span>' +
       '<button data-act="mesAnyo" data-d="1"' + (iy >= ys.length - 1 ? ' disabled' : '') + '>›</button></div></div>' +
-      monthBarsHTML(st, ay, true) +
+      monthBarsHTML(st, ay, true, true) +
       '<div class="mes-cifras">' +
       '<div><i class="ing"></i><span>Ingresos</span><b class="ing">' + money0(st.I.colTotals[ay] || 0) + '</b></div>' +
       '<div><i class="gas"></i><span>Gastos</span><b class="gas">' + money0(st.G.colTotals[ay] || 0) + '</b></div>' +
-      '<div><i class="bal"></i><span>Balance</span><b class="bal">' + money0(st.bal[ay] || 0) + '</b></div>' +
-      '</div>' +
-      '<div class="corte"></div>' +
-      '<div class="chart-head" style="margin:0 0 16px"><div class="chart-title">Anual</div></div>' +
+      '</div></div>' +
+      '<div class="chart-card bside">' +
+      '<div class="chart-head"><div class="chart-title">Anual</div></div>' +
       barsHTML(st, true) +
-      '</div></div></div>';
+      '</div></div>';
     return h;
   }
 
