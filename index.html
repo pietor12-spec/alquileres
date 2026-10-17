@@ -589,6 +589,17 @@ function pmenu(abrir) {
   if (o) o.classList.toggle("open", !!abrir);
   if (b) b.classList.toggle("open", !!abrir);
 }
+/* la fila tabla + anillos acaba justo en el borde inferior de la pantalla */
+function ajustarResTop() {
+  if (MOBILE) return;
+  const r = document.querySelector(".tab-content.active .res-top");
+  if (!r) return;
+  r.style.minHeight = "";
+  const top = r.getBoundingClientRect().top + window.scrollY;
+  const libre = window.innerHeight - top - 14;
+  if (libre > r.offsetHeight) r.style.minHeight = libre + "px";
+}
+window.addEventListener("resize", () => requestAnimationFrame(ajustarResTop));
 /* pantalla completa (web) */
 function pantallaCompleta() {
   const d = document, e = d.documentElement;
@@ -603,6 +614,7 @@ function pantallaCompleta() {
   const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
   b.innerHTML = on ? ICO.contract : ICO.expand;
   b.title = on ? "Salir de pantalla completa" : "Pantalla completa";
+  setTimeout(ajustarResTop, 120);
 }));
 /* cargar copia desde un archivo .json */
 document.addEventListener("change", function (ev) {
@@ -1024,14 +1036,20 @@ const CSS_DESK = CSS_BASE + `
 .res-top{gap:16px;margin-bottom:16px;}
 .res-top .chart-card{padding:16px 20px;}
 .res-top .chart-head{margin-bottom:10px;}
-.res-top .mx td{padding:4px 8px;}
+.res-top .mx td{padding:5px 8px;}
 .res-top .mx tr.sub td{padding-top:1px;}
 .res-top .mx tr.sep td{padding:6px 0 0;}
 .res-top .mx th{padding-bottom:7px;}
 .res-top .donas{gap:14px;}
-.res-top .donut{width:124px;height:124px;}
+.res-top .donut{width:140px;height:140px;}
 .res-top .donut-c b{font-size:18px;}
 .res-top .donut-wrap{padding:0;}
+/* la fila se estira hasta el borde inferior de la pantalla (lo ajusta ajustarResTop) */
+.res-top > .chart-card{display:flex;flex-direction:column;}
+.res-top > .chart-card > .wrapx{flex:1;display:flex;flex-direction:column;}
+.res-top > .chart-card > .wrapx > table.mx{flex:1;height:100%;}
+.res-top .donas .chart-card{display:flex;flex-direction:column;}
+.res-top .donas .donut-wrap{flex:1;}
 .donas .chart-card{flex:1;}
 @media(max-width:1100px){.res-top{grid-template-columns:1fr;}}
 .corte{height:1px;background:var(--border);margin:34px 0 30px;}
@@ -1922,6 +1940,7 @@ function initDesktop() {
     const box = el("tab-" + U.tab);
     if (!box) return;
     box.innerHTML = U.tab === "registro" ? vRegistro() : U.tab === "fijos" ? vFijos() : vResumen();
+    ajustarResTop();
     const q = el("q");
     if (q) q.oninput = function () { U.q = q.value; const p = q.selectionStart; repaint(); const q2 = el("q"); if (q2) { q2.focus(); try { q2.setSelectionRange(p, p); } catch (e) {} } };
     syncBadge();
