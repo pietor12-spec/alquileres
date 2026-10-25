@@ -770,6 +770,11 @@ button{background:none;border:none;cursor:pointer;}
 .btip em{font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
 .btip span{font-family:'JetBrains Mono';font-size:13.5px;font-weight:700;}
 .btip .ing{color:var(--green);} .btip .gas{color:var(--red);} .btip .bal{color:var(--b);}
+/* anual: las cifras se ven siempre, encima de las columnas */
+.bars.con-cifras,.bside .bars.con-cifras{height:auto;}
+.bars.con-cifras .bar{height:auto;}
+.bars.con-cifras .btip{position:static;opacity:1;transform:none;margin-bottom:12px;box-shadow:none;pointer-events:auto;}
+.bars.con-cifras .bar:hover .btip{transform:none;}
 
 /* ══ ANILLO ══ */
 .donut-wrap{display:flex;align-items:center;justify-content:center;gap:30px;flex-wrap:wrap;padding:6px 0 4px;}
@@ -842,6 +847,8 @@ button{background:none;border:none;cursor:pointer;}
   padding:0 8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:right;}
 .mx th:first-child{text-align:left;padding-left:4px;}
 .mx th.tot{color:var(--text);}
+.mx thead th{font-size:14px;letter-spacing:1px;}
+.res-top .mx thead th{font-size:15px;}
 .mx td{padding:7px 8px;font-family:'JetBrains Mono';font-size:13px;text-align:right;white-space:nowrap;}
 .mx td:first-child{font-family:'Syne';font-size:13.5px;font-weight:700;text-align:left;padding-left:4px;color:var(--text);}
 .mx.bal td{font-size:14.5px;padding:8px 8px;}
@@ -1176,11 +1183,11 @@ textarea.io{width:100%;height:150px;background:var(--surface2);border:1px solid 
 `;
 
 const CSS_MOB = CSS_BASE + `
-/* acento por vivienda (solo selector, recuadro del resumen y balance grande) */
-.pbar button.on{color:var(--p-ink) !important;background:linear-gradient(135deg,var(--p),color-mix(in srgb,var(--p) 62%,#000)) !important;}
-.hero{background:linear-gradient(155deg,rgba(var(--p-rgb),.10),var(--surface) 62%) !important;
-  border-color:rgba(var(--p-rgb),.4) !important;box-shadow:0 0 34px rgba(var(--p-rgb),.13) !important;}
-.hero-val{color:var(--p) !important;text-shadow:0 0 26px rgba(var(--p-rgb),.3) !important;}
+/* mismos colores que la web: selector amarillo y balance en cian, sin distinguir vivienda */
+.pbar button.on{color:var(--m-ink) !important;background:linear-gradient(135deg,var(--m),color-mix(in srgb,var(--m) 62%,#000)) !important;}
+.hero{background:linear-gradient(155deg,rgba(var(--b-rgb),.10),var(--surface) 62%) !important;
+  border-color:rgba(var(--b-rgb),.4) !important;box-shadow:0 0 34px rgba(var(--b-rgb),.13) !important;}
+.hero-val{color:var(--b) !important;text-shadow:0 0 26px rgba(var(--b-rgb),.3) !important;}
 .hero, .hero-val, .pbar button{transition:background .3s,border-color .3s,box-shadow .3s,color .3s;}
 .sec-lab.big{font-size:12.5px;letter-spacing:1.4px;margin:18px 4px 10px;}
 .sec-lab.big span{font-size:16px;font-weight:700;}
@@ -1451,11 +1458,11 @@ function barsHTML(st, sinLeyenda) {
   const max = Math.max.apply(null, st.years.map(y =>
     Math.max(st.I.colTotals[y] || 0, st.G.colTotals[y] || 0, Math.abs(st.bal[y] || 0)))) || 1;
   const alto = (v) => Math.max(3, Math.round(Math.abs(v) / max * 112));
-  let h = (sinLeyenda ? '' : leyendaHTML(true)) + '<div class="bars">';
+  let h = (sinLeyenda ? '' : leyendaHTML(true)) + '<div class="bars con-cifras">';
   st.years.forEach(y => {
     const i = st.I.colTotals[y] || 0, g = st.G.colTotals[y] || 0, b = st.bal[y] || 0;
     h += '<div class="bar' + (y === YEAR_NOW ? ' now' : '') + '">' +
-      '<u class="btip"><em>' + y + '</em><div>' +
+      '<u class="btip"><div>' +
       '<span class="ing">' + money0(i) + '</span>' +
       '<span class="gas">' + money0(g) + '</span>' +
       '<span class="bal">' + money0(b) + '</span></div></u>' +
