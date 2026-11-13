@@ -1213,7 +1213,10 @@ const CSS_MOB = CSS_BASE + `
   border-color:rgba(var(--b-rgb),.4) !important;box-shadow:0 0 34px rgba(var(--b-rgb),.13) !important;}
 .hero-val{color:var(--b) !important;text-shadow:0 0 26px rgba(var(--b-rgb),.3) !important;}
 .hero, .hero-val, .pbar button{transition:background .3s,border-color .3s,box-shadow .3s,color .3s;}
-.hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px;container-type:inline-size;}
+/* cifra grande sin decimales: ocupa todo el hueco a la izquierda del botón */
+.hero-val.grande{flex:1;min-width:0;margin:0;white-space:nowrap;letter-spacing:-1px;line-height:1;
+  font-size:min(68px, calc((100cqw - 150px) / (var(--n, 8) * 0.6)));}
 .colseg{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px;}
 .colseg button{padding:7px 13px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);}
 .colseg button.on{background:rgba(var(--b-rgb),.16);color:var(--b);box-shadow:inset 0 0 0 1px rgba(var(--b-rgb),.45);}
@@ -2072,10 +2075,10 @@ function initMobile() {
     const anyoV = st.years.indexOf(YEAR_NOW) >= 0 ? YEAR_NOW : (st.years[st.years.length - 1] || YEAR_NOW);
     const modo = U.colM === "total" ? "total" : "anyo";
     const valor = modo === "total" ? st.balance : (st.bal[anyoV] || 0);
-    let h = '<div class="hero"><div class="hero-top"><div class="hero-lab">Balance ' + (modo === "total" ? "total" : anyoV) + '</div>' +
+    const cifra = money0(valor);
+    let h = '<div class="hero"><div class="hero-top"><div class="hero-val grande" style="--n:' + cifra.length + '">' + cifra + '</div>' +
       '<div class="colseg"><button data-act="colM" data-c="anyo"' + (modo === "anyo" ? ' class="on"' : '') + '>' + anyoV + '</button>' +
       '<button data-act="colM" data-c="total"' + (modo === "total" ? ' class="on"' : '') + '>Total</button></div></div>' +
-      '<div class="hero-val">' + money(valor) + '</div>' +
       '<div class="wrapx" style="margin-top:18px">' + balanceHTML(st, modo) + '</div></div>';
     h += '<div class="card"><div class="ctitle">Ingresos y gastos por año</div>' + barsHTML(st) + '</div>';
     return h;
