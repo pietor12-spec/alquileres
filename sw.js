@@ -2,7 +2,7 @@
    - Archivos de la app: red primero (así siempre ves la última versión) y, si no hay red, la copia guardada.
    - Fuentes de Google: copia guardada primero.
    - La API de GitHub (sincronización) nunca se cachea. */
-const CACHE = "alquileres-v1";
+const CACHE = "alquileres-v2";
 const APP = ["./", "index.html", "manifest.webmanifest", "icons/logo.svg", "icons/icon-192.png",
   "icons/icon-512.png", "icons/apple-touch-icon.png", "icons/favicon-32.png"];
 

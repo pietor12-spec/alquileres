@@ -645,7 +645,7 @@ function mostrarSplash() {
 #splash h1{margin:0;font-family:'Syne',ui-sans-serif,system-ui,sans-serif;font-weight:800;font-size:40px;letter-spacing:-1px;
   color:#e8f4fc;opacity:0;animation:spT .7s .15s ease-out forwards;}
 #splash h1 span{color:#ffd740;}
-#splash img{width:132px;height:132px;border-radius:30px;filter:drop-shadow(0 12px 34px rgba(255,215,64,.28));
+#splash img{width:160px;height:160px;border-radius:50%;filter:drop-shadow(0 12px 34px rgba(255,215,64,.28));
   transform:scale(.7);opacity:0;animation:spL .8s cubic-bezier(.2,1.3,.4,1) forwards;}
 #splash i{display:block;width:120px;height:3px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;}
 #splash i::after{content:"";display:block;height:100%;width:0;background:linear-gradient(90deg,#ffe27a,#f5b800);
@@ -920,6 +920,8 @@ const CSS_DESK = CSS_BASE + `
   padding:14px 40px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
   position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
 .header-brand{display:flex;align-items:center;gap:14px;}
+.marca{background:none !important;padding:0;border-radius:50% !important;overflow:visible;box-shadow:none !important;}
+.marca img{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 8px rgba(0,0,0,.45));}
 .logo-btn{border:none;cursor:pointer;color:var(--m-ink);transition:transform .15s,filter .15s;}
 .logo-btn:hover{transform:translateY(-1px);filter:brightness(1.06);}
 .logo-btn.open{box-shadow:0 0 0 2px rgba(var(--m-rgb),.45);}
@@ -1218,6 +1220,8 @@ html,body{overscroll-behavior-y:none;}
 
 /* ══ MENÚ DESPLEGABLE DE SECCIONES ══ */
 .ab-burger{color:var(--text);}
+.marca{background:none !important;padding:0;border-radius:50% !important;overflow:visible;box-shadow:none !important;}
+.marca img{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 8px rgba(0,0,0,.45));}
 .ab-logo-btn{position:relative;border:none;cursor:pointer;width:42px;height:42px;}
 .ab-logo-btn svg{width:22px;height:22px;}
 .ab-logo-btn .ab-caret{position:absolute;right:-4px;bottom:-4px;width:17px;height:17px;border-radius:50%;font-style:normal;
@@ -1771,7 +1775,7 @@ function dataImport() {
 const HTML_DESK = `<header class="header">
   <div class="header-brand">
     <div class="sync dot-only"><i></i></div>
-    <button class="logo-mark logo-btn" id="ab-menu" data-act="pmenu" title="Menú" aria-label="Menú" aria-haspopup="true">${ICO.casa}</button>
+    <button class="logo-mark logo-btn marca" id="ab-menu" data-act="pmenu" title="Menú" aria-label="Menú" aria-haspopup="true"><img src="icons/logo.svg" alt=""></button>
     <h1>Alquileres</h1>
     <button class="btn-primary solo" data-act="nuevo" title="Nuevo movimiento" aria-label="Nuevo movimiento">＋</button>
   </div>
@@ -2011,7 +2015,7 @@ function initDesktop() {
 
 /* ══════════════ INTERFAZ DE MÓVIL ══════════════ */
 const HTML_MOB = `<header class="appbar">
-  <button class="ab-logo ab-logo-btn" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true">${ICO.casa}</button>
+  <button class="ab-logo ab-logo-btn marca" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true"><img src="icons/logo.svg" alt=""></button>
   <div class="ab-tit"><b class="ab-big">Alquileres</b></div>
   <button class="ab-btn add" data-act="nuevo" aria-label="Añadir movimiento">＋</button>
 </header>
