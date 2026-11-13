@@ -431,6 +431,20 @@ window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); INST
 window.addEventListener("appinstalled", () => { INSTALAR = null; toast("App instalada"); });
 const ES_STANDALONE = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
 const ES_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+/* botón «Instalar app» del menú del móvil */
+async function instalarDesdeMenu() {
+  if (INSTALAR) {
+    INSTALAR.prompt();
+    try { const r = await INSTALAR.userChoice; if (r && r.outcome === "accepted") toast("Instalando la app…"); } catch (e) {}
+    INSTALAR = null;
+    return;
+  }
+  const pasos = ES_IOS
+    ? '<ol class="pasos"><li>Pulsa <b>Compartir</b> (el cuadrado con la flecha hacia arriba) en Safari.</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li><li>Pulsa <b>Añadir</b>.</li></ol>'
+    : '<ol class="pasos"><li>Abre el menú <b>⋮</b> del navegador, arriba a la derecha.</li><li>Pulsa <b>Instalar app</b> o <b>Añadir a pantalla de inicio</b>.</li><li>Confirma con <b>Instalar</b>.</li></ol>' +
+      '<div class="gnote">Si no aparece, puede que ya la tengas instalada: búscala en tus aplicaciones.</div>';
+  preguntarInfo("Instalar Alquileres", pasos);
+}
 async function instalarApp() {
   if (!INSTALAR) return;
   INSTALAR.prompt();
@@ -564,6 +578,13 @@ async function copiar(txt) {
   toast("Copiado al portapapeles");
 }
 
+function preguntarInfo(titulo, html) {
+  if (MOBILE && el("sheet")) {
+    el("sheet").innerHTML = '<div class="grab"></div><button class="sheet-x" data-act="close-sheet" aria-label="Cerrar">✕</button>' +
+      '<h3>' + titulo + '</h3>' + html + '<button class="btn pri" style="margin-top:16px" data-act="close-sheet">Entendido</button>';
+    el("sheet").classList.add("open"); el("ov").classList.add("open");
+  } else toast(titulo);
+}
 function preguntarSimple(t, sub, si, fn) {
   preguntar(t, fn);
   document.querySelectorAll('[data-act="ask-si"]').forEach(b => { b.textContent = si; });
@@ -583,7 +604,8 @@ function pmenu(abrir) {
     m.innerHTML = VISTAS_M.map(([k, n]) =>
       '<button role="menuitem" data-act="view-m" data-v="' + k + '"' + (U.view === k ? ' class="on"' : '') + '>' +
       ICO[k] + n + (U.view === k ? '<span class="ck">✓</span>' : '') + '</button>').join("") +
-      '<hr><button role="menuitem" data-act="pmenu-datos">' + ICO.disquete + 'Datos y copia</button>';
+      '<hr>' + (ES_STANDALONE ? '' : '<button role="menuitem" data-act="pmenu-instalar">' + ICO.instalar + 'Instalar app</button>') +
+      '<button role="menuitem" data-act="pmenu-datos">' + ICO.disquete + 'Datos y copia</button>';
   }
   m.classList.toggle("open", !!abrir);
   if (o) o.classList.toggle("open", !!abrir);
@@ -1191,6 +1213,8 @@ const CSS_MOB = CSS_BASE + `
   border-color:rgba(var(--b-rgb),.4) !important;box-shadow:0 0 34px rgba(var(--b-rgb),.13) !important;}
 .hero-val{color:var(--b) !important;text-shadow:0 0 26px rgba(var(--b-rgb),.3) !important;}
 .hero, .hero-val, .pbar button{transition:background .3s,border-color .3s,box-shadow .3s,color .3s;}
+.pasos{margin:14px 0 6px 20px;font-size:14.5px;line-height:1.6;color:var(--text);}
+.pasos li{margin-bottom:8px;} .pasos b{color:var(--m);}
 .sec-lab.big{font-size:12.5px;letter-spacing:1.4px;margin:18px 4px 10px;}
 .sec-lab.big span{font-size:16px;font-weight:700;}
 .sec-lab.big .chev{font-size:12px;}
@@ -1398,6 +1422,7 @@ const ICO = {
   registro: SV('<rect x="4.6" y="2.8" width="14.8" height="18.4" rx="2"/><path d="M12 7.2v9.6M14.2 9.4c0-1.2-1-1.9-2.2-1.9s-2.2.6-2.2 1.7c0 2.6 4.4 1.3 4.4 3.9 0 1.2-1 1.8-2.2 1.8s-2.2-.7-2.2-1.9"/>'),
   expand: SV('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
   contract: SV('<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>'),
+  instalar: SV('<path d="M12 3.5v11.5M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/>'),
   menu: SV('<path d="M4 6.5h16M4 12h16M4 17.5h16"/>'),
   disquete: SV('<path d="M5 3.5h11.2L20.5 7.8V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V5A1.5 1.5 0 0 1 5 3.5z"/><path d="M7.5 3.5v5h8v-5"/><rect x="7" y="13" width="10" height="7.5" rx="1"/>'),
   fijos: SV('<path d="M3.6 8.4h13.2l-3-3M20.4 15.6H7.2l3 3"/>'),
@@ -2171,6 +2196,7 @@ function act(a, ds) {
     case "pmenu-close": pmenu(false); break;
     case "fullscreen": pantallaCompleta(); break;
     case "pmenu-datos": pmenu(false); abrirDatos(); break;
+    case "pmenu-instalar": pmenu(false); instalarDesdeMenu(); break;
     case "view-m": pmenu(false); U.view = ds.v; saveLocal(); repaint(); window.scrollTo(0, 0); break;
     case "nav-open": abrirNav(true); break;
     case "nav-close": abrirNav(false); break;
