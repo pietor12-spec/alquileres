@@ -9,9 +9,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Alquileres">
 <title>Tracker de Alquileres</title>
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/svg+xml" href="icons/logo.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=3">
+<link rel="icon" type="image/svg+xml" href="icons/logo.svg?v=3">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=3">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="description" content="Ingresos, gastos y fijos de tus viviendas en alquiler.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -656,7 +656,7 @@ function mostrarSplash() {
   document.head.appendChild(st);
   const d = document.createElement("div");
   d.id = "splash";
-  d.innerHTML = '<h1>Alquileres</h1><img src="icons/logo.svg" alt=""><i></i>';
+  d.innerHTML = '<h1>Alquileres</h1><img src="icons/logo.svg?v=3" alt=""><i></i>';
   document.body.appendChild(d);
   setTimeout(() => { d.classList.add("out"); setTimeout(() => d.remove(), 450); }, 2600);
 }
@@ -1775,7 +1775,7 @@ function dataImport() {
 const HTML_DESK = `<header class="header">
   <div class="header-brand">
     <div class="sync dot-only"><i></i></div>
-    <button class="logo-mark logo-btn marca" id="ab-menu" data-act="pmenu" title="Menú" aria-label="Menú" aria-haspopup="true"><img src="icons/logo.svg" alt=""></button>
+    <button class="logo-mark logo-btn marca" id="ab-menu" data-act="pmenu" title="Menú" aria-label="Menú" aria-haspopup="true"><img src="icons/logo.svg?v=3" alt=""></button>
     <h1>Alquileres</h1>
     <button class="btn-primary solo" data-act="nuevo" title="Nuevo movimiento" aria-label="Nuevo movimiento">＋</button>
   </div>
@@ -2015,7 +2015,7 @@ function initDesktop() {
 
 /* ══════════════ INTERFAZ DE MÓVIL ══════════════ */
 const HTML_MOB = `<header class="appbar">
-  <button class="ab-logo ab-logo-btn marca" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true"><img src="icons/logo.svg" alt=""></button>
+  <button class="ab-logo ab-logo-btn marca" id="ab-menu" data-act="pmenu" aria-label="Menú" aria-haspopup="true"><img src="icons/logo.svg?v=3" alt=""></button>
   <div class="ab-tit"><b class="ab-big">Alquileres</b></div>
   <button class="ab-btn add" data-act="nuevo" aria-label="Añadir movimiento">＋</button>
 </header>
@@ -2287,6 +2287,9 @@ function arrancar() {
 
 if ("serviceWorker" in navigator && location.protocol === "https:") {
   window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  /* cuando entra una versión nueva de la app, recarga una vez para mostrarla */
+  let _recargado = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (_recargado) return; _recargado = true; location.reload(); });
 }
 
 if (document.body) arrancar();
