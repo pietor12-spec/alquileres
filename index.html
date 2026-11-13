@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
-<style>html,body{margin:0;background:#080c12;color:#e8f4fc;font-family:'Syne',ui-sans-serif,system-ui,sans-serif;}</style>
+<style>html,body{margin:0;background:#080c12;color:#e8f4fc;font-family:'Inter',ui-sans-serif,system-ui,sans-serif;}</style>
 <script>
 /* ══════════════════════════════════════════════════════════════
    TRACKER DE ALQUILERES · ingresos, gastos y fijos de las viviendas
@@ -44,7 +44,7 @@ const ACENTO_PROP = {
   donostia: { m: "#22d3ee", rgb: "34,211,238", ink: "#002a33" },
   todas:    { m: "#00e676", rgb: "0,230,118",  ink: "#00230f" }
 };
-const ORDEN_PROP = ["madrid", "donostia", "todas"];
+const ORDEN_PROP = ["todas", "madrid", "donostia"];
 
 /* conceptos por tipo de movimiento */
 const CONCEPTOS = {
@@ -83,7 +83,7 @@ function setVista(x) {
 /* ---------- estado ---------- */
 let S = { movs: [], fijos: [], deleted: [] };
 let U = {
-  prop: "madrid", tab: "resumen", view: "resumen",
+  prop: "todas", tab: "resumen", view: "resumen", colM: "anyo",
   fijoKind: "gasto", q: "", fKind: "", fTipo: "", fYear: "", fMes: "",
   sort: "fecha", dir: "desc", openY: [], mesAnyo: null, openSec: []
 };
@@ -202,7 +202,7 @@ function mergeRemote(d) {
   if (miosF.length) { S.fijos = S.fijos.concat(miosF); faltan = true; }
   return faltan;
 }
-const UI_KEYS = ["prop", "tab", "view", "fijoKind", "fKind", "fTipo", "fYear", "fMes", "sort", "dir", "mesAnyo"];
+const UI_KEYS = ["colM", "prop", "tab", "view", "fijoKind", "fKind", "fTipo", "fYear", "fMes", "sort", "dir", "mesAnyo"];
 function loadLocal() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -664,7 +664,7 @@ function mostrarSplash() {
 #splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
   background:radial-gradient(circle at 50% 46%,#16202f 0%,#080c12 62%);transition:opacity .4s ease;}
 #splash.out{opacity:0;pointer-events:none;}
-#splash h1{margin:0;font-family:'Syne',ui-sans-serif,system-ui,sans-serif;font-weight:800;font-size:40px;letter-spacing:-1px;
+#splash h1{margin:0;font-family:'Inter',ui-sans-serif,system-ui,sans-serif;font-weight:800;font-size:40px;letter-spacing:-1px;
   color:#e8f4fc;opacity:0;animation:spT .7s .15s ease-out forwards;}
 #splash h1 span{color:#ffd740;}
 #splash img{width:160px;height:160px;border-radius:50%;filter:drop-shadow(0 12px 34px rgba(255,215,64,.28));
@@ -708,7 +708,7 @@ function aplicarAcento() {
 
 
 /* ══════════════ ESTILOS ══════════════ */
-const CSS_BASE = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+const CSS_BASE = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root{
   --bg:#080c12; --surface:#0d1420; --surface2:#111b2a; --surface3:#16233a; --border:#1d2d42;
@@ -720,14 +720,14 @@ const CSS_BASE = `@import url('https://fonts.googleapis.com/css2?family=Syne:wgh
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Syne',ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--text);
+body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--text);
   min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
 button,input,select,textarea{font-family:inherit;color:inherit;}
 button{background:none;border:none;cursor:pointer;}
 .btn-ghost svg,.btn-primary svg,.search svg{width:16px;height:16px;flex-shrink:0;}
 .search svg{color:var(--muted);}
-.ini{border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;font-family:'Syne';}
+.ini{border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;font-family:'Inter';}
 .sync{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono';font-size:10px;color:var(--muted);white-space:nowrap;}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:block;}
 .sync.ok i{background:var(--green);box-shadow:0 0 7px var(--green);}
@@ -872,18 +872,18 @@ button{background:none;border:none;cursor:pointer;}
 .mx thead th{font-size:14px;letter-spacing:1px;}
 .res-top .mx thead th{font-size:15px;}
 .mx td{padding:7px 8px;font-family:'JetBrains Mono';font-size:13px;text-align:right;white-space:nowrap;}
-.mx td:first-child{font-family:'Syne';font-size:13.5px;font-weight:700;text-align:left;padding-left:4px;color:var(--text);}
+.mx td:first-child{font-family:'Inter';font-size:13.5px;font-weight:700;text-align:left;padding-left:4px;color:var(--text);}
 .mx.bal td{font-size:14.5px;padding:8px 8px;}
 .mx.bal td:first-child{font-size:15px;}
 .mx.bal th{font-size:11px;}
 .mx.bal tr.sub td{font-size:12.5px;}
 .mx.bal tr.sec td{font-size:11px;}
 .mx td.tot{padding-right:4px;}
-.mx tr.sec td{font-family:'Syne';font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
+.mx tr.sec td{font-family:'Inter';font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
   text-align:left;padding:18px 4px 4px;}
 .mx tr.sec.ing td{color:var(--green);}
 .mx tr.sec.gas td{color:var(--red);}
-.mx tr.vacia td{font-family:'Syne';font-size:12px;font-weight:500;color:var(--muted);text-align:left;padding:6px 4px;}
+.mx tr.vacia td{font-family:'Inter';font-size:12px;font-weight:500;color:var(--muted);text-align:left;padding:6px 4px;}
 .mx tr.sum td,.mx tr.sum td:first-child{font-weight:800;}
 .mx tr.sum.ing td{color:var(--green);}
 .mx tr.sum.gas td{color:var(--red);}
@@ -1213,6 +1213,10 @@ const CSS_MOB = CSS_BASE + `
   border-color:rgba(var(--b-rgb),.4) !important;box-shadow:0 0 34px rgba(var(--b-rgb),.13) !important;}
 .hero-val{color:var(--b) !important;text-shadow:0 0 26px rgba(var(--b-rgb),.3) !important;}
 .hero, .hero-val, .pbar button{transition:background .3s,border-color .3s,box-shadow .3s,color .3s;}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.colseg{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px;}
+.colseg button{padding:7px 13px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);}
+.colseg button.on{background:rgba(var(--b-rgb),.16);color:var(--b);box-shadow:inset 0 0 0 1px rgba(var(--b-rgb),.45);}
 .pasos{margin:14px 0 6px 20px;font-size:14.5px;line-height:1.6;color:var(--text);}
 .pasos li{margin-bottom:8px;} .pasos b{color:var(--m);}
 .sec-lab.big{font-size:12.5px;letter-spacing:1.4px;margin:18px 4px 10px;}
@@ -1439,19 +1443,23 @@ const ICO = {
 const colorKind = (k) => (k === "ingreso" ? "var(--green)" : "#ff5b6e");
 
 /* ── Tabla de balance: ingresos, gastos y resultado por año ── */
-function balanceHTML(st) {
+function balanceHTML(st, solo) {
   if (!st.years.length) return "";
-  const ys = st.years, N = ys.length + 2;
+  /* solo = "anyo": solo el año actual · "total": solo el total · nada: todas las columnas */
+  const anyoSolo = st.years.indexOf(YEAR_NOW) >= 0 ? YEAR_NOW : st.years[st.years.length - 1];
+  const ys = solo === "anyo" ? [anyoSolo] : solo === "total" ? [] : st.years;
+  const conTotal = solo !== "anyo";
+  const N = ys.length + 1 + (conTotal ? 1 : 0);
   const fila = (lab, vals, total, cls) => {
     let h = '<tr class="' + (cls || "") + '"><td>' + lab + '</td>';
-    ys.forEach(y => { h += '<td>' + (vals[y] ? money0(vals[y]) : "—") + '</td>'; });
-    return h + '<td class="tot">' + money0(total) + '</td></tr>';
+    ys.forEach(y => { h += '<td' + (solo ? ' class="tot"' : '') + '>' + (vals[y] ? money0(vals[y]) : "—") + '</td>'; });
+    return h + (conTotal ? '<td class="tot">' + money0(total) + '</td>' : '') + '</tr>';
   };
   const div = (v, k) => { const o = {}; ys.forEach(y => { o[y] = (v[y] || 0) / k; }); return o; };
 
   let h = '<table class="mx bal"><thead><tr><th></th>';
   ys.forEach(y => { h += '<th' + (y === YEAR_NOW ? ' class="tot"' : '') + '>' + y + '</th>'; });
-  h += '<th class="tot">Total</th></tr></thead><tbody>';
+  h += (conTotal ? '<th class="tot">Total</th>' : '') + '</tr></thead><tbody>';
 
   h += '<tr class="sec ing"><td colspan="' + N + '">Ingresos</td></tr>';
   st.I.types.forEach(t => { h += fila(esc(t), st.I.matrix[t], st.I.rowTotals[t]); });
@@ -2061,9 +2069,14 @@ function initMobile() {
   function vResumen() {
     const st = stats(listOf(U.prop));
     if (!st.n && !S.fijos.length) return '<div class="card"><div class="empty"><b>Sin movimientos en ' + esc(PROPS[U.prop].label) + '</b>Toca ＋ para añadir el alquiler o el primer gasto.</div></div>';
-    let h = '<div class="hero"><div class="hero-lab">Balance</div>' +
-      '<div class="hero-val">' + money(st.balance) + '</div>' +
-      '<div class="wrapx" style="margin-top:18px">' + balanceHTML(st) + '</div></div>';
+    const anyoV = st.years.indexOf(YEAR_NOW) >= 0 ? YEAR_NOW : (st.years[st.years.length - 1] || YEAR_NOW);
+    const modo = U.colM === "total" ? "total" : "anyo";
+    const valor = modo === "total" ? st.balance : (st.bal[anyoV] || 0);
+    let h = '<div class="hero"><div class="hero-top"><div class="hero-lab">Balance ' + (modo === "total" ? "total" : anyoV) + '</div>' +
+      '<div class="colseg"><button data-act="colM" data-c="anyo"' + (modo === "anyo" ? ' class="on"' : '') + '>' + anyoV + '</button>' +
+      '<button data-act="colM" data-c="total"' + (modo === "total" ? ' class="on"' : '') + '>Total</button></div></div>' +
+      '<div class="hero-val">' + money(valor) + '</div>' +
+      '<div class="wrapx" style="margin-top:18px">' + balanceHTML(st, modo) + '</div></div>';
     h += '<div class="card"><div class="ctitle">Ingresos y gastos por año</div>' + barsHTML(st) + '</div>';
     return h;
   }
@@ -2194,6 +2207,7 @@ function act(a, ds) {
     case "view": U.view = ds.v; saveLocal(); repaint(); break;
     case "pmenu": pmenu(!(el("pmenu") && el("pmenu").classList.contains("open"))); break;
     case "pmenu-close": pmenu(false); break;
+    case "colM": U.colM = ds.c === "total" ? "total" : "anyo"; saveLocal(); repaint(); break;
     case "fullscreen": pantallaCompleta(); break;
     case "pmenu-datos": pmenu(false); abrirDatos(); break;
     case "pmenu-instalar": pmenu(false); instalarDesdeMenu(); break;
@@ -2283,6 +2297,8 @@ function arrancar() {
   mostrarSplash();
 
   loadLocal();
+  /* al abrir: siempre Total y Resumen */
+  U.prop = "todas"; U.tab = "resumen"; U.view = "resumen";
   if (devengar()) saveLocal();
   aplicarAcento();
 
