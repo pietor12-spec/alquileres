@@ -551,6 +551,18 @@ function toggleFijo(id) {
 /* ---------- copia de seguridad ---------- */
 function importar(raw, modo) {
   const p = JSON.parse(raw);
+  /* archivo solo con la ficha de viviendas: no toca movimientos ni fijos */
+  if (p && p.viv && !(Array.isArray(p.movs) && p.movs.length) && !(Array.isArray(p.fijos) && p.fijos.length)) {
+    const nv = limpiaViv(p.viv);
+    ["madrid", "donostia"].forEach(k => {
+      const actual = S.viv[k] || {};
+      const limpio = {};
+      Object.keys(nv[k]).forEach(c => { if (nv[k][c] !== "" && nv[k][c] != null) limpio[c] = nv[k][c]; });
+      S.viv[k] = Object.assign({}, actual, limpio, { u: Date.now() });
+    });
+    save(); repaint(); toast("Ficha de viviendas cargada");
+    return 0;
+  }
   const arrM = Array.isArray(p) ? p : (Array.isArray(p.movs) ? p.movs : (Array.isArray(p.entries) ? p.entries : null));
   if (!arrM) throw new Error("formato");
   const movs = arrM.map(limpiaMov);
@@ -669,7 +681,7 @@ const FICHA = [
       { k: "agua_basura_junto", l: "Agua y basuras en el mismo recibo", b: 1 } ] },
     { t: "Basuras", oculta: "agua_basura_junto", items: [ { k: "ref_basura", l: "Nº de referencia", c: 1 }, { k: "cta_basura", l: "Cuenta de cargo", a: 1 } ] } ] },
   { t: "Seguro y caldera", sub: [
-    { t: "Seguro hogar", items: [ { k: "cia_seguro", l: "Compañía" }, { k: "poliza_seguro", l: "Nº de póliza", c: 1 }, { k: "cta_seguro", l: "Cuenta de cargo", a: 1 } ] },
+    { t: "Seguro hogar", items: [ { k: "cia_seguro", l: "Compañía" }, { k: "poliza_seguro", l: "Nº de póliza", c: 1 }, { k: "renov_seguro", l: "Se renueva cada año el" }, { k: "cta_seguro", l: "Cuenta de cargo", a: 1 } ] },
     { t: "Caldera", items: [ { k: "cia_caldera", l: "Compañía de mantenimiento" }, { k: "contrato_caldera", l: "Nº de contrato", c: 1 }, { k: "cta_caldera", l: "Cuenta de cargo", a: 1 } ] } ] },
   { t: "Cobros y pagos", items: [
     { k: "cta_alquiler", l: "Alquiler · cuenta donde cobras", a: 1 }, { k: "cta_ibi", l: "IBI · cuenta de cargo", a: 1 },
@@ -1932,7 +1944,7 @@ function dataImport() {
   if (!txt) { if (errBox) errBox.innerHTML = '<div class="err">Pega antes el texto de la copia.</div>'; return; }
   try {
     const n = importar(txt, D_MODO);
-    toast(n + " movimientos importados");
+    if (n) toast(n + " movimientos importados");
     cerrarTodo();
   } catch (e) {
     if (errBox) errBox.innerHTML = '<div class="err">El texto no es una copia válida.</div>';
