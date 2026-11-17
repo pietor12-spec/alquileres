@@ -551,6 +551,13 @@ function toggleFijo(id) {
 /* ---------- copia de seguridad ---------- */
 function importar(raw, modo) {
   const p = JSON.parse(raw);
+  /* archivo solo con documentos: no toca ningún dato que hayas cambiado */
+  if (p && p.docs_data && !p.viv && !(Array.isArray(p.movs) && p.movs.length) && !(Array.isArray(p.fijos) && p.fijos.length)) {
+    const ks = Object.keys(p.docs_data);
+    Promise.all(ks.map(k => docPut(k, b64aBlob(p.docs_data[k])))).then(() => { refrescarDocs(); repaint(); toast(ks.length + " documentos cargados"); },
+      () => toast("No se pudieron guardar los documentos"));
+    return 0;
+  }
   /* archivo solo con la ficha de viviendas: no toca movimientos ni fijos */
   if (p && p.viv && !(Array.isArray(p.movs) && p.movs.length) && !(Array.isArray(p.fijos) && p.fijos.length)) {
     const nv = limpiaViv(p.viv);
@@ -740,17 +747,20 @@ let DOCS_AQUI = new Set();
 function refrescarDocs() { docKeys().then(k => { const n = new Set(k); const cambio = n.size !== DOCS_AQUI.size || k.some(x => !DOCS_AQUI.has(x)); DOCS_AQUI = n; if (cambio && (U.view === "viviendas" || U.tab === "viviendas")) repaint(); }).catch(() => {}); }
 function b64aBlob(b64) { const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: "application/pdf" }); }
 function blobAb64(blob) { return new Promise(ok => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1] || ""); r.readAsDataURL(blob); }); }
-async function verDoc(p, slot) {
-  const b = await docGet(p + ":" + slot).catch(() => null);
+const dniKey = (p, d) => p + ":dni:" + String(d || "").toUpperCase().replace(/[^0-9A-Z]/g, "");
+async function verDoc(p, slot, key) {
+  const b = await docGet(key || (p + ":" + slot)).catch(() => null);
   if (!b) { toast("Ese PDF no está en este dispositivo"); return; }
   const url = URL.createObjectURL(b);
   const w = window.open(url, "_blank");
   if (!w) { const a = document.createElement("a"); a.href = url; a.download = ((S.viv[p] || {})["doc_" + slot] || {}).n || (slot + ".pdf"); document.body.appendChild(a); a.click(); a.remove(); }
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
-function subirDoc(p, slot) {
+function subirDoc(p, slot, dniK) {
   const i = el("v-file"); if (!i) return;
-  i.dataset.p = p; i.dataset.slot = slot; i.value = ""; i.click();
+  i.dataset.p = p; i.dataset.slot = slot || ""; i.dataset.dk = dniK || "";
+  i.accept = dniK ? "application/pdf,.pdf,image/*" : "application/pdf,.pdf";
+  i.value = ""; i.click();
 }
 async function quitarDoc(p, slot) {
   await docDel(p + ":" + slot).catch(() => {});
@@ -760,6 +770,11 @@ document.addEventListener("change", async function (ev) {
   const i = ev.target; if (!i || i.id !== "v-file") return;
   const f = i.files && i.files[0]; if (!f) return;
   const p = i.dataset.p, slot = i.dataset.slot;
+  if (i.dataset.dk) {
+    try { await docPut(i.dataset.dk, f.slice(0, f.size, f.type || "application/pdf")); refrescarDocs(); repaint(); toast("Documento guardado"); }
+    catch (e) { toast("No se pudo guardar el documento"); }
+    return;
+  }
   try {
     await docPut(p + ":" + slot, f.slice(0, f.size, "application/pdf"));
     S.viv[p]["doc_" + slot] = Object.assign({}, S.viv[p]["doc_" + slot] || {}, { n: f.name, t: f.size });
@@ -786,7 +801,13 @@ function inquilinosHTML(p) {
       '<input class="vf vi" data-p="' + p + '" data-i="' + i + '" data-f="n" value="' + esc(x.n || "") + '" placeholder="Nombre y apellidos" autocomplete="off" spellcheck="false">' +
       '<div class="vin"><input class="vf vi vdni" data-p="' + p + '" data-i="' + i + '" data-f="d" value="' + esc(x.d || "") + '" placeholder="DNI / NIE" autocomplete="off" spellcheck="false">' +
       '<button class="vcopy" data-act="vinq-copy" data-p="' + p + '" data-i="' + i + '" aria-label="Copiar DNI">' + ICO.copiar + '</button>' +
-      '<button class="vcopy x" data-act="vinq-del" data-p="' + p + '" data-i="' + i + '" aria-label="Quitar">✕</button></div></div></div>';
+      '<button class="vcopy x" data-act="vinq-del" data-p="' + p + '" data-i="' + i + '" aria-label="Quitar">✕</button></div>' +
+      (x.d ? (DOCS_AQUI.has(dniKey(p, x.d))
+        ? '<div class="vdni-doc"><button class="vbtn pri" data-act="vdni-ver" data-p="' + p + '" data-i="' + i + '">🪪 Ver DNI</button>' +
+          '<button class="vbtn" data-act="vdni-subir" data-p="' + p + '" data-i="' + i + '">Cambiar</button>' +
+          '<button class="vbtn x" data-act="vdni-quitar" data-p="' + p + '" data-i="' + i + '" aria-label="Quitar documento">✕</button></div>'
+        : '<div class="vdni-doc"><button class="vbtn" data-act="vdni-subir" data-p="' + p + '" data-i="' + i + '">🪪 Adjuntar foto o PDF del DNI</button></div>') : '') +
+      '</div></div>';
   });
   return h + '<button class="vadd" data-act="vinq-add" data-p="' + p + '">+ Añadir inquilino</button></div>';
 }
@@ -836,6 +857,9 @@ function accionVivienda(act, ds) {
     case "vdoc-quitar": if (confirm("¿Quitar este PDF de la ficha?")) quitarDoc(p, ds.s); return true;
     case "vinq-add": { const l = Array.isArray(S.viv[p].inq) ? S.viv[p].inq.slice() : []; l.push({ n: "", d: "" }); S.viv[p].inq = l; S.viv[p].u = Date.now(); save(); repaint(); return true; }
     case "vinq-del": { const l = (S.viv[p].inq || []).slice(); const x = l[+ds.i] || {}; if ((x.n || x.d) && !confirm("¿Quitar a " + (x.n || "este inquilino") + "?")) return true; l.splice(+ds.i, 1); S.viv[p].inq = l; S.viv[p].u = Date.now(); save(); repaint(); return true; }
+    case "vdni-ver": { const x = (S.viv[p].inq || [])[+ds.i] || {}; verDoc(p, "", dniKey(p, x.d)); return true; }
+    case "vdni-subir": { const x = (S.viv[p].inq || [])[+ds.i] || {}; if (!x.d) { toast("Escribe antes el DNI"); return true; } subirDoc(p, "", dniKey(p, x.d)); return true; }
+    case "vdni-quitar": { const x = (S.viv[p].inq || [])[+ds.i] || {}; if (confirm("¿Quitar el documento del DNI?")) docDel(dniKey(p, x.d)).then(() => { refrescarDocs(); repaint(); toast("Documento quitado"); }); return true; }
     case "vinq-copy": { const x = (S.viv[p].inq || [])[+ds.i] || {}; if (!x.d) { toast("Ese DNI está vacío"); return true; } navigator.clipboard.writeText(x.d).then(() => toast("Copiado"), () => copiar(x.d)); return true; }
   }
   return false;
@@ -1206,6 +1230,7 @@ button{background:none;border:none;cursor:pointer;}
   font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:6px;}
 .vinq-c{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
 .vf.vdni:not(.vsw){font-family:'JetBrains Mono',monospace;font-size:14px;}
+.vdni-doc{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
 .vadd{margin:10px 0 6px;width:100%;padding:10px;border-radius:11px;border:1px dashed var(--border);background:transparent;
   color:var(--b);font-weight:700;font-size:13.5px;font-family:inherit;cursor:pointer;}
 .btn svg{width:17px;height:17px;vertical-align:-3px;margin-right:6px;}
@@ -2490,7 +2515,7 @@ function act(a, ds) {
     case "pmenu": pmenu(!(el("pmenu") && el("pmenu").classList.contains("open"))); break;
     case "pmenu-close": pmenu(false); break;
     case "vcopy": copiarDato(ds.p, ds.k); break;
-    case "vsec": case "vdoc-ver": case "vdoc-subir": case "vdoc-quitar": case "vinq-add": case "vinq-del": case "vinq-copy": accionVivienda(a, ds); break;
+    case "vsec": case "vdoc-ver": case "vdoc-subir": case "vdoc-quitar": case "vinq-add": case "vinq-del": case "vinq-copy": case "vdni-ver": case "vdni-subir": case "vdni-quitar": accionVivienda(a, ds); break;
     case "copiar-enlace": copiar("https://pietor12-spec.github.io/alquileres/"); break;
     case "colM": U.colM = ds.c === "total" ? "total" : "anyo"; saveLocal(); repaint(); break;
     case "fullscreen": pantallaCompleta(); break;
