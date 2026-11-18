@@ -45,6 +45,12 @@ const ACENTO_PROP = {
   todas:    { m: "#00e676", rgb: "0,230,118",  ink: "#00230f" }
 };
 const ORDEN_PROP = ["todas", "madrid", "donostia"];
+const enViv = () => (typeof MOBILE !== "undefined" && MOBILE) ? U.view === "viviendas" : U.tab === "viviendas";
+function botonesProp() {
+  if (enViv()) return ["madrid", "donostia"].map(k =>
+    '<button data-act="vprop" data-p="' + k + '"' + (U.vprop === k ? ' class="on"' : '') + '>' + PROPS[k].label + '</button>').join("");
+  return ORDEN_PROP.map(k => '<button data-act="prop" data-p="' + k + '"' + (U.prop === k ? ' class="on"' : '') + '>' + PROPS[k].label + '</button>').join("");
+}
 
 /* conceptos por tipo de movimiento */
 const CONCEPTOS = {
@@ -87,12 +93,16 @@ function limpiaViv(v) {
   const d = vivDefecto();
   if (!v || typeof v !== "object") return d;
   ["madrid", "donostia"].forEach(k => { if (v[k] && typeof v[k] === "object") d[k] = Object.assign({}, d[k], v[k], { u: num(v[k].u) }); });
+  ["madrid", "donostia"].forEach(k => { const x = d[k];
+    if (x.renov_seguro && !x.cobro_seguro) x.cobro_seguro = x.renov_seguro;
+    if (x.pago_ibi && !x.cobro_ibi) x.cobro_ibi = x.pago_ibi;
+    delete x.renov_seguro; delete x.pago_ibi; });
   return d;
 }
 let U = {
   prop: "todas", tab: "resumen", view: "resumen", colM: "anyo",
   fijoKind: "gasto", q: "", fKind: "", fTipo: "", fYear: "", fMes: "",
-  sort: "fecha", dir: "desc", openY: [], mesAnyo: null, openSec: [], vsec: "datos"
+  sort: "fecha", dir: "desc", openY: [], mesAnyo: null, openSec: [], vsec: "datos", vprop: "madrid", vopen: []
 };
 let editing = null, editingFijo = null;
 
@@ -210,7 +220,7 @@ function mergeRemote(d) {
   if (miosF.length) { S.fijos = S.fijos.concat(miosF); faltan = true; }
   return faltan;
 }
-const UI_KEYS = ["colM", "prop", "tab", "view", "fijoKind", "fKind", "fTipo", "fYear", "fMes", "sort", "dir", "mesAnyo", "vsec"];
+const UI_KEYS = ["colM", "prop", "tab", "view", "fijoKind", "fKind", "fTipo", "fYear", "fMes", "sort", "dir", "mesAnyo", "vsec", "vprop", "vopen"];
 function loadLocal() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -699,9 +709,9 @@ const FICHA_SECC = [
       { k: "tensionada", l: "Zona tensionada", b: 1 } ] } ] },
   { id: "inquilinos", t: "Inquilinos y alquiler", especial: 1 },
   { id: "recibos", t: "Recibos", g: [
-    { t: "Caldera", items: [ { k: "cia_caldera", l: "Compañía de mantenimiento" }, { k: "contrato_caldera", l: "Nº de contrato", c: 1 } ] },
-    { t: "Seguro hogar", items: [ { k: "cia_seguro", l: "Compañía" }, { k: "poliza_seguro", l: "Nº de póliza", c: 1 }, { k: "renov_seguro", l: "Se renueva cada año el" } ] },
-    { t: "IBI", items: [ { k: "ref_ibi", l: "Referencia del recibo", c: 1 }, { k: "pago_ibi", l: "Cuándo se paga" } ] } ] },
+    { t: "IBI", items: [ { k: "ref_ibi", l: "Referencia del recibo", c: 1 }, { k: "cobro_ibi", l: "Fecha de cobro" } ] },
+    { t: "Caldera", items: [ { k: "cia_caldera", l: "Compañía de mantenimiento" }, { k: "contrato_caldera", l: "Nº de contrato", c: 1 }, { k: "cobro_caldera", l: "Fecha de cobro" } ] },
+    { t: "Seguro hogar", items: [ { k: "cia_seguro", l: "Compañía" }, { k: "poliza_seguro", l: "Nº de póliza", c: 1 }, { k: "cobro_seguro", l: "Fecha de cobro" } ] } ] },
   { id: "suministros", t: "Suministros", g: [
     { t: "Luz", items: [ { k: "cups_luz", l: "CUPS", c: 1 }, { k: "cia_luz", l: "Compañía" }, { k: "cta_luz", l: "Cuenta de cargo", a: 1 } ] },
     { t: "Gas", items: [ { k: "cups_gas", l: "CUPS", c: 1 }, { k: "cia_gas", l: "Compañía" }, { k: "cta_gas", l: "Cuenta de cargo", a: 1 } ] },
@@ -812,24 +822,30 @@ function inquilinosHTML(p) {
   return h + '<button class="vadd" data-act="vinq-add" data-p="' + p + '">+ Añadir inquilino</button></div>';
 }
 function fichaHTML(p) {
-  const d = S.viv[p] || {};
-  const sec = FICHA_SECC.find(x => x.id === U.vsec) || FICHA_SECC[0];
+  const d = S.viv[p] || {}, abiertas = Array.isArray(U.vopen) ? U.vopen : [];
   let h = '<div class="vcasa"><div class="vcasa-h">' + ICO.casa + '<b>' + esc(PROPS[p].full) + '</b></div>';
-  if (sec.especial) h += inquilinosHTML(p);
-  else sec.g.forEach(g => {
-    if (g.oculta && d[g.oculta]) return;
-    h += '<div class="vgrupo"><div class="vg-t">' + ((g.tj && d.agua_basura_junto) ? g.tj : g.t) + '</div>' +
-      '<div class="vgrid">' + g.items.map(it => campoHTML(p, it)).join("") + '</div></div>';
+  FICHA_SECC.forEach(sec => {
+    const ab = abiertas.indexOf(sec.id) >= 0;
+    h += '<div class="vacc' + (ab ? ' open' : '') + '"><button class="vacc-h" data-act="vsec" data-s="' + sec.id + '"><span>' + sec.t + '</span><i class="chev' + (ab ? ' open' : '') + '">▾</i></button>';
+    if (ab) {
+      h += '<div class="vacc-b">';
+      if (sec.especial) h += inquilinosHTML(p);
+      else sec.g.forEach(g => {
+        if (g.oculta && d[g.oculta]) return;
+        h += '<div class="vgrupo"><div class="vg-t">' + ((g.tj && d.agua_basura_junto) ? g.tj : g.t) + '</div>' +
+          '<div class="vgrid">' + g.items.map(it => campoHTML(p, it)).join("") + '</div></div>';
+      });
+      h += '</div>';
+    }
+    h += '</div>';
   });
   return h + '</div>';
 }
 function vViviendas() {
-  if (!FICHA_SECC.some(x => x.id === U.vsec)) U.vsec = "datos";
-  const ps = U.prop === "todas" ? ["madrid", "donostia"] : [U.prop];
+  if (U.vprop !== "madrid" && U.vprop !== "donostia") U.vprop = "madrid";
   return '<datalist id="dl-cuentas">' + cuentasUsadas().map(c => '<option value="' + esc(c) + '">').join("") + '</datalist>' +
     '<input type="file" id="v-file" accept="application/pdf,.pdf" style="display:none">' +
-    '<div class="vsecs">' + FICHA_SECC.map(x => '<button class="vsec' + (x.id === U.vsec ? ' on' : '') + '" data-act="vsec" data-s="' + x.id + '">' + x.t + '</button>').join("") + '</div>' +
-    '<div class="vlista">' + ps.map(fichaHTML).join("") + '</div>';
+    '<div class="vlista uno">' + fichaHTML(U.vprop) + '</div>';
 }
 let _vT = null;
 document.addEventListener("input", function (ev) {
@@ -851,7 +867,8 @@ document.addEventListener("input", function (ev) {
 function accionVivienda(act, ds) {
   const p = ds.p;
   switch (act) {
-    case "vsec": U.vsec = ds.s; saveLocal(); repaint(); return true;
+    case "vsec": { const o = Array.isArray(U.vopen) ? U.vopen.slice() : []; const i = o.indexOf(ds.s); if (i >= 0) o.splice(i, 1); else o.push(ds.s); U.vopen = o; saveLocal(); repaint(); return true; }
+    case "vprop": U.vprop = ds.p; saveLocal(); repaint(); return true;
     case "vdoc-ver": verDoc(p, ds.s); return true;
     case "vdoc-subir": subirDoc(p, ds.s); return true;
     case "vdoc-quitar": if (confirm("¿Quitar este PDF de la ficha?")) quitarDoc(p, ds.s); return true;
@@ -942,7 +959,7 @@ function aplicarAcento() {
   r.setProperty("--m-rgb", ACENTO.rgb);
   r.setProperty("--m-ink", ACENTO.ink);
   /* color propio de cada vivienda: botón elegido, recuadro del resumen y balance grande */
-  const P = ACENTO_PROP[U.prop] || ACENTO;
+  const P = ACENTO_PROP[enViv() ? U.vprop : U.prop] || ACENTO;
   r.setProperty("--p", P.m);
   r.setProperty("--p-rgb", P.rgb);
   r.setProperty("--p-ink", P.ink);
@@ -1230,6 +1247,15 @@ button{background:none;border:none;cursor:pointer;}
   font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:6px;}
 .vinq-c{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
 .vf.vdni:not(.vsw){font-family:'JetBrains Mono',monospace;font-size:14px;}
+.vlista.uno{grid-template-columns:minmax(0,1fr) !important;max-width:760px;margin:0 auto;}
+.vacc{border-top:1px solid var(--border);}
+.vacc-h{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 2px;background:none;border:none;
+  color:var(--text);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;}
+.vacc.open .vacc-h{color:var(--b);}
+.vacc-h .chev{font-style:normal;font-size:12px;color:var(--muted);transition:transform .2s;}
+.vacc-h .chev.open{transform:rotate(180deg);color:var(--b);}
+.vacc-b{padding:0 0 8px;}
+.vacc-b .vgrupo:first-child{border-top:none;padding-top:0;}
 .vdni-doc{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
 .vadd{margin:10px 0 6px;width:100%;padding:10px;border-radius:11px;border:1px dashed var(--border);background:transparent;
   color:var(--b);font-weight:700;font-size:13.5px;font-family:inherit;cursor:pointer;}
@@ -2159,8 +2185,7 @@ function initDesktop() {
   function propSeg() {
     const s = el("prop-seg");
     if (!s) return;
-    s.innerHTML = ORDEN_PROP.map(k =>
-      '<button data-act="prop" data-p="' + k + '"' + (U.prop === k ? ' class="on"' : '') + '>' + PROPS[k].label + '</button>').join("");
+    s.innerHTML = botonesProp();
   }
   function kpi(lab, val, cls) {
     return '<div class="kpi-card"><div class="kpi-label">' + lab + '</div>' +
@@ -2441,8 +2466,7 @@ function initMobile() {
     if (sub) sub.innerHTML = '<span class="dot' + (SYNC.mode === "cloud" ? " ok" : "") + '"></span>' +
       esc(PROPS[U.prop].full) + " · " + money0(st.balance);
     const pb = el("pbar");
-    if (pb) pb.innerHTML = ORDEN_PROP.map(k =>
-      '<button data-act="prop" data-p="' + k + '"' + (U.prop === k ? ' class="on"' : '') + '>' + PROPS[k].label + '</button>').join("");
+    if (pb) pb.innerHTML = botonesProp();
     document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.v === U.view));
     const av = el("ab-view");
     if (av) av.textContent = (VISTAS_M.find(x => x[0] === U.view) || VISTAS_M[0])[1];
@@ -2515,7 +2539,7 @@ function act(a, ds) {
     case "pmenu": pmenu(!(el("pmenu") && el("pmenu").classList.contains("open"))); break;
     case "pmenu-close": pmenu(false); break;
     case "vcopy": copiarDato(ds.p, ds.k); break;
-    case "vsec": case "vdoc-ver": case "vdoc-subir": case "vdoc-quitar": case "vinq-add": case "vinq-del": case "vinq-copy": case "vdni-ver": case "vdni-subir": case "vdni-quitar": accionVivienda(a, ds); break;
+    case "vsec": case "vprop": case "vdoc-ver": case "vdoc-subir": case "vdoc-quitar": case "vinq-add": case "vinq-del": case "vinq-copy": case "vdni-ver": case "vdni-subir": case "vdni-quitar": accionVivienda(a, ds); break;
     case "copiar-enlace": copiar("https://pietor12-spec.github.io/alquileres/"); break;
     case "colM": U.colM = ds.c === "total" ? "total" : "anyo"; saveLocal(); repaint(); break;
     case "fullscreen": pantallaCompleta(); break;
