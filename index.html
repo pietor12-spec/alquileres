@@ -570,8 +570,10 @@ function importar(raw, modo) {
   }
   /* archivo solo con la ficha de viviendas: no toca movimientos ni fijos */
   if (p && p.viv && !(Array.isArray(p.movs) && p.movs.length) && !(Array.isArray(p.fijos) && p.fijos.length)) {
-    const nv = limpiaViv(p.viv);
+    const nv = { madrid: (p.viv.madrid && typeof p.viv.madrid === "object") ? p.viv.madrid : {},
+                 donostia: (p.viv.donostia && typeof p.viv.donostia === "object") ? p.viv.donostia : {} };
     ["madrid", "donostia"].forEach(k => {
+      if (!Object.keys(nv[k]).some(c => c !== "u")) return;
       const actual = S.viv[k] || {};
       const limpio = {};
       Object.keys(nv[k]).forEach(c => { if (nv[k][c] !== "" && nv[k][c] != null) limpio[c] = nv[k][c]; });
@@ -722,6 +724,7 @@ const FICHA_SECC = [
     { t: "Lo que cobras", items: [ { k: "cta_alquiler", l: "Alquiler · cuenta donde lo recibes", a: 1, c: 1 } ] },
     { t: "Lo que te cargan", items: [
       { k: "cta_ibi", l: "IBI", a: 1, c: 1 }, { k: "cta_comunidad", l: "Comunidad", a: 1, c: 1 },
+      { k: "cta_basuras_imp", l: "Impuesto de basuras", a: 1, c: 1 },
       { k: "cta_caldera", l: "Caldera", a: 1, c: 1 }, { k: "cta_seguro", l: "Seguro hogar", a: 1, c: 1 } ] } ] }
 ];
 const DOC_SLOTS = [["contrato", "Contrato"], ["anexo", "Último anexo"]];
